@@ -1,0 +1,39 @@
+name: Scrape_Tamil_Stories
+
+on:
+  workflow_dispatch:
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        pip install requests beautifulsoup4 unidecode gTTS pydub
+
+    - name: Run scraper
+      run: |
+        python scripts/Fetch_Story.py
+
+    # Step 5: Configure Git
+    - name: Set up Git
+      run: |
+        git config --global user.name "summa"
+        git config --global user.email "summa@gmail.com"
+        
+    - name: Authenticate and Push Changes
+      env:
+        GH_PAT: ${{ secrets.GH_PAT }}
+      run: |
+        git remote set-url origin https://x-access-token:${GH_PAT}@github.com/greenteamz/Scrape_TSS.git
+        git status
+        git add stories_text/
+        git commit -m "$(date) Tamil sty"
+        git push origin main --force
